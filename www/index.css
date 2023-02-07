@@ -1,0 +1,220 @@
+/* beautiful list design */
+*{
+    margin: 0;
+    padding: 0;
+}
+body {
+    margin: 0;
+    /* dark background */
+    background:#251749;
+    font-family: sans-serif;
+
+  }
+
+
+.loader{
+  width: 100%;
+  height:100%;
+    position: fixed;
+    background-color: rgba(0,0,0,0.7);
+    display: none;
+}
+
+.loader.show{
+    display: block;
+}
+
+.loader__inner{
+    position: absolute;
+    height:50px;
+    width:50px;
+    border-radius: 50%;
+    border: 5px solid #f3f3f3;
+    border-top: 5px solid #3498db;
+
+    animation: spin 1s linear infinite;
+    top:40%;
+    left:45%;
+}
+
+@keyframes spin{
+    0%{
+        transform: rotate(0deg);
+    }
+    100%{
+        transform: rotate(360deg);
+    }
+}
+
+
+
+
+.title{
+    font-size: 25px;
+    color:#495579;
+    text-align: center;
+    margin-bottom: 10px;
+  
+}
+
+
+
+  canvas {
+    height:200px;
+    width:250px;
+    border-radius:10px;
+  }
+
+  
+
+
+  .container{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding:20px;
+  }
+  .canva-container{
+    /* margin-top:50px; */
+    position: relative;
+    width: 300px;;
+    height: 300px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .canva-container video{
+    position: absolute;
+    top:0;
+    left:0;
+  }
+
+  .canva-container canvas{
+    position: absolute;
+    top:0;
+    left:0;
+  }
+
+  #expression{
+    height:40px;
+    font-size: 25px;
+    margin-top: 10px;
+    border-radius: 10px;
+    text-align: center;
+   padding:6px;
+   display: flex;
+    align-items: center;
+    justify-content: center;
+   /* color:white; */
+   /* background-color: transparent; */
+   width:65%;
+  }
+
+  .suggested-songs{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    /* padding:20px; */
+    width: 100%;;
+  }
+
+ul {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+  overflow: overflow;
+
+  width: 90%;;
+}
+
+
+
+.angry{
+  background-color: red;
+}
+
+.happy{
+  background-color: green;
+}
+
+.sad{
+  background-color: blue;
+}
+
+.neutral{
+  background-color: yellow;
+  color: black;
+}
+
+.fearful{
+  background-color: purple;
+}
+
+.disgusted{
+  background-color: orange;
+  color: black;
+}
+
+.surprised{
+  background-color: pink;
+  color: black;
+}
+
+.suggested-songs{
+    border:solid black 2px;
+    margin-bottom: 10px;
+    border-radius: 10px;
+   
+    padding: 10px;
+    height:300px;
+    margin-top: 20px;
+    overflow: auto;
+}
+
+.song-list li{
+    background-color: #f1f1f1;
+    width: 100%;
+    padding: 10px;
+
+    border-radius: 10px;
+}
+
+.song-info{
+
+    width: 70%;
+}
+.song-controls{
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    width: 30%;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    gap: 10px;
+}
+
+
+.song-item{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    margin-top: 10px;
+    margin-bottom: 10px;
+
+}
+
+.play-btn,.pause-btn{
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background-color: #f1f1f1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 10px;
+    margin-bottom: 10px;
+}

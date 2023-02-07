@@ -7,65 +7,18 @@
     <title>Emotion Decetion With face-api.js</title>
     <!-- inlcude cordova.js -->
     <!-- <script src="cordova.js"></script> -->
-    <style>
-      body {
-        margin: 0;
-        /* dark background */
-        background: rgb(0, 9, 76);
-      }
-      canvas {
-        height:200px;
-        width:250px;
-        border-radius:10px;
-      }
-
-      h3{
-      
-        font-size: 25px;
-        color:orange;
-      }
-
-      h4{
-        color:rgb(218, 226, 0);
-        font-size:30px
-      }
-      .container{
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        padding:20px;
-      }
-      .canva-container{
-        /* margin-top:50px; */
-        position: relative;
-        width: 300px;;
-        height: 300px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-      }
-
-      .canva-container video{
-        position: absolute;
-        top:0;
-        left:0;
-      }
-
-      .canva-container canvas{
-        position: absolute;
-        top:0;
-        left:0;
-      }
-
-    </style>
+    <link rel="stylesheet" href="index.css" />
   </head>
   <body>
+    <!-- create spinning loader -->
+    <div id="loader" class="loader">
+      <div class="loader__inner"></div>
+    </div>
+
     <div class="container">
-      <div>
-        <h3>Face Expression Detector</h3>
-       
-      </div>
+      
+        <h3  class="title">Face Expression Detector</h3>
+     
         
         <!-- <canvas id="canvas" width="320" height="240"></canvas> -->
         <!-- <div class="canva-container" id="canvaContainer">
@@ -74,9 +27,17 @@
         <h4 id="expression">
           Expression...
         </h4>
+        <div class="suggested-songs">
+          <h3 class="title">Suggested Songs</h3>
+          <ul id="song-list" class="song-list">
+           
+          </ul>
+        </div>
       </div>
+     
       <video style="display:none" id="video" width="300" height="300" autoplay></video>
     <script src="face-api.min.js"></script>
     <script src="app.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css" integrity="sha512-MV7K8+y+gLIBoVD59lQIYicR65iaqukzvf/nwasF0nqhPay5w/9lJmVM2hMDcnK1OnMGCdVK+iQrJ7lzPJQd1w==" crossorigin="anonymous" referrerpolicy="no-referrer" />
   </body>
 </html>
