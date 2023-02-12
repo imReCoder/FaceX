@@ -13,87 +13,111 @@ let click_button = document.querySelector("#click-photo");
 let canvaContainer = document.querySelector("#canvaContainer");
 const expression = document.querySelector("#expression");
 const canvas = document.querySelector("#canvas");
-const context = canvas.getContext("2d");
+// const context = canvas.getContext("2d");
 const expressionEl = document.querySelector("#expression");
 const loaderEl = document.querySelector("#loader");
 
 const songListEl = document.querySelector("#song-list");
+const songTypeEl = document.querySelector("#song-type");
+const songLock = document.querySelector("#song-lock");
+let isSongLock = false;
+songLock.addEventListener("change", () => {
+  isSongLock = !isSongLock;
+})
+
+
+function videoLoaded() {
+  console.log("video loaded");
+
+  //   video.play();
+}
 
 function renderLoop() {
   requestAnimationFrame(renderLoop);
-  context.clearRect(0, 0, 300, 300);
-  context.drawImage(video, 0, 0, 300, 300);
+  // context.clearRect(0, 0, 300, 300);
+  // context.drawImage(video, 0, 0, 300, 300);
   drawLoop();
 }
 
 const startDetecting = async () => {
-  let stream = await navigator.mediaDevices.getUserMedia({
-    video: true,
+  showLoader();
+  var constraints = {
     audio: false,
-  });
+    video: {
+      width: { ideal: 500 },
+      height: { ideal: 500 },
+      facingMode: "user",
+      frameRate: {
+        ideal: 10,
+        max: 15
+      }
+    }
+  };
+  let stream = await navigator.mediaDevices.getUserMedia(constraints);
   video.srcObject = stream;
   await faceapi.nets.ssdMobilenetv1.loadFromUri("./models");
-  await faceapi.nets.faceLandmark68Net.loadFromUri("./models");
+  // await faceapi.nets.faceLandmark68Net.loadFromUri("./models");
   await faceapi.nets.faceExpressionNet.loadFromUri("./models");
-
+  // await faceapi.nets.ageGenderNet.loadFromUri("./models");
+  hideLoader();
   renderLoop();
 };
 
 const drawLoop = async () => {
-  // get the image data from the video element
-
-  // const canvas = faceapi.createCanvasFromMedia(video);
-  // set canva size
 
   const detection = await faceapi
     .detectAllFaces(video)
-    .withFaceLandmarks()
-    .withFaceExpressions();
-  //    .withAgeAndGender();
+    // .withFaceLandmarks()
+    .withFaceExpressions()
+    // .withAgeAndGender();
   // console.log(detection);
 
   let expString = "";
+  removeAllClasses();
+  if (!detection.length) {
+    expString = "No Face";
+    expressionEl.classList.add("no-face");
+  }
   for (let i = 0; i < detection.length; i++) {
     const face = detection[i];
     if (face && face.expressions) {
       const exp = detection[0].expressions;
-      removeAllClasses();
       if (exp.happy > 0.5) {
         expString += "Happy ";
         expressionEl.classList.add("happy");
-        debouncedAppendSongs(songs.happySongs);
+        debouncedAppendSongs(songs.happySongs, "happy");
       } else if (exp.sad > 0.5) {
         expString += "Sad ";
         expressionEl.classList.add("sad");
-        debouncedAppendSongs(songs?.sadSongs);
+        debouncedAppendSongs(songs?.sadSongs, "sad");
       } else if (exp.angry > 0.5) {
         expString += "Angry ";
         expressionEl.classList.add("angry");
-        debouncedAppendSongs(songs?.angrySongs);
+        debouncedAppendSongs(songs?.angrySongs, "angry");
       } else if (exp.disgusted > 0.5) {
         expString += "Disgusted ";
         expressionEl.classList.add("disgusted");
-        debouncedAppendSongs(songs?.disgustedSongs);
+        debouncedAppendSongs(songs?.disgustedSongs, "disgusted");
       } else if (exp.fearful > 0.5) {
         expString += "Fearful ";
         expressionEl.classList.add("fearful");
-        debouncedAppendSongs(songs?.fearfulSongs);
+        debouncedAppendSongs(songs?.fearfulSongs, "fearful");
       } else if (exp.neutral > 0.5) {
         expString += "Neutral ";
         expressionEl.classList.add("neutral");
-        debouncedAppendSongs(songs?.neutralSongs);
+        debouncedAppendSongs(songs?.neutralSongs, "neutral");
       } else if (exp.surprised > 0.5) {
         expString += "Surprised ";
         expressionEl.classList.add("surprised");
-        debouncedAppendSongs(songs?.surprisedSongs);
+        debouncedAppendSongs(songs?.surprisedSongs, "surprised");
       }
     }
-    context.strokeStyle = "#FFFF00";
-    context.lineWidth = 5;
-    const { left, right, width, height } = face.alignedRect.box;
-    context.beginPath();
-    context.rect(left, right, width, height);
-    context.stroke();
+    // context.strokeStyle = "#FFFF00";
+    // context.lineWidth = 5;
+    // const { left, right, width, height } = face.alignedRect.box;
+    // context.beginPath();
+    // context.rect(left, right, width, height);
+    // context.stroke();
   }
   expression.innerHTML = expString;
 };
@@ -106,6 +130,7 @@ const removeAllClasses = () => {
   expressionEl.classList.remove("fearful");
   expressionEl.classList.remove("neutral");
   expressionEl.classList.remove("surprised");
+  expressionEl.classList.remove("no-face");
 };
 
 const showLoader = () => {
@@ -118,21 +143,128 @@ const hideLoader = () => {
 
 // debounce append songs once every 10 seconds without any library
 let timeout;
-
-const debouncedAppendSongs = (songs) => {
-  console.log("debouncedAppendSongs");
+const debounceTime = 1000
+const debouncedAppendSongs = (songs, mood) => {
   if (timeout) {
     return;
   }
   timeout = setTimeout(() => {
-    appendSongs(songs);
+    appendSongs(songs, mood);
     timeout = null;
-  }, 5000);
+  }, debounceTime);
 };
 
-const appendSongs = (songs) => {
+
+let audio;
+let currentlyPlayingSongId;
+let currentMood = null;
+
+const markAllSongsPause = () => {
+  const songEls = document.querySelectorAll(".song-controls");
+  songEls.forEach((songEl) => {
+    pauseSongUiUpdate(songEl);
+  })
+}
+const playSongs = (songs, songId) => {
+  // clear all audio started before
+  if (audio) {
+    audio.pause();
+  }
+  let song = songs[0];
+  if (songId) {
+    song = songs.find((song) => song.id === songId);
+  }
+
+  if (!song) {
+    song = songs[0];
+  }
+  markAllSongsPause();
+  audio = new Audio(song.path);
+  audio.play();
+  currentlyPlayingSongId = song.id;
+  // get song element
+  const songEl = document.querySelector(`#${song.id}`);
+  console.log("song el is: ", songEl);
+
+  playSongUiUpdate(songEl);
+
+  audio.addEventListener("ended", () => {
+    playSongs(songs.slice(1));
+  });
+
+};
+
+const playSongUiUpdate = (songEl) => {
+  if (songEl) {
+    const playButton = songEl.querySelector(".play-btn");
+    const pauseButton = songEl.querySelector(".pause-btn");
+    playButton.classList.add("hide");
+    playButton.classList.remove('show')
+    pauseButton.classList.remove("hide");
+    pauseButton.classList.add("show");
+
+    // add active class to its parent element
+    songEl.parentElement.classList.add("active");
+  }
+}
+
+const pauseSongUiUpdate = (songEl) => {
+  if (songEl) {
+    const playButton = songEl.querySelector(".play-btn");
+    const pauseButton = songEl.querySelector(".pause-btn");
+    playButton.classList.remove("hide");
+    playButton.classList.add("show");
+    pauseButton.classList.add("hide");
+    pauseButton.classList.remove("show");
+    // remove active class from its parent element
+    songEl.parentElement.classList.remove("active");
+  }
+}
+
+
+
+const playSong = (songEl) => {
+  const songId = songEl.id;
+  if (currentlyPlayingSongId === songId) {
+    if (audio) {
+      audio.play();
+      playSongUiUpdate(songEl);
+      return
+    }
+  }
+  console.log("play song id is: ", songId);
+  const song = songs[currentMood + "Songs"].find((song) => song.id === songId);
+  console.log("song is: ", song);
+  if (song) {
+    playSongs([song]);
+  }
+}
+
+const pauseSong = (songEl) => {
+  console.log("pause song id is: ", songEl);
+  if (audio) {
+    audio.pause();
+  }
+  // const songEl = document.querySelector(`#${songId}`);
+  console.log("song el is: ", songEl);
+  pauseSongUiUpdate(songEl);
+}
+
+let lastMood = null;
+const appendSongs = (songs, mood) => {
+  if (isSongLock) {
+    return console.log("song lock is on..");
+  }
+  currentMood = mood;
+  // check if last songs are same as current songs
+  console.log("latest mood", lastMood, " current mood", mood);
+  if (lastMood === mood) {
+    return;
+  }
+  songTypeEl.innerHTML = mood;
+
   songListEl.innerHTML = "";
-  console.log(songs);
+  // console.log(songs);
   songs.forEach((song) => {
     const li = document.createElement("li");
     li.classList.add("song-item");
@@ -141,11 +273,11 @@ const appendSongs = (songs) => {
       <h4 class="song-title">${song.title}</h4>
       <p class="song-artist">Artist</p>
     </div>
-    <div class="song-controls">
-      <button class="play-btn">
+    <div id="${song.id}" class="song-controls">
+      <button class="control play-btn" onclick='playSong(${song.id})'>
         <i class="fas fa-play"></i>
       </button>
-      <button class="pause-btn">
+      <button class="control pause-btn" onclick='pauseSong(${song.id})'>
         <i class="fas fa-pause"></i>
       </button>
     </div>`;
@@ -153,6 +285,8 @@ const appendSongs = (songs) => {
 
     songListEl.appendChild(li);
   });
+  lastMood = mood;
+  playSongs(songs);
 };
 
 startDetecting();
@@ -160,74 +294,142 @@ startDetecting();
 const songs = {
   happySongs: [
     {
-      title: "Happy Song 1",
-      path: "happySong1.mp3",
+      title: "Mann mera",
+      path: "./songs/happySong1.mp3",
+      id: "happySong1",
     },
     {
-      title: "Happy Song 2",
-      path: "happySong2.mp3",
+      title: "Excuses",
+      path: "./songs/happySong2.mp3",
+      id: "happySong2",
     },
+    {
+      title: "Hey Baby",
+      path: "./songs/happySong3.mp3",
+      id: "happySong3",
+    }
   ],
   sadSongs: [
     {
-      title: "Sad Song 1",
-      path: "sadSong1.mp3",
+      title: "Chahun main ya na",
+      path: "./songs/sadSong1.mp3",
+      id: "sadSong1",
+
+    }, {
+      title: "Desire",
+      path: "./songs/sadSong2.mp3",
+      id: "sadSong2",
+
     },
     {
-      title: "Sad Song 2",
-      path: "sadSong2.mp3",
+      title: "Kyun main jaagoon",
+      path: "./songs/sadSong3.mp3",
+      id: "sadSong3",
     },
+    {
+      title: "Tu jo mila",
+      path: "./songs/sadSong4.mp3",
+      id: "sadSong4",
+
+    }
   ],
   angrySongs: [
     {
-      title: "Angry Song 1",
-      path: "angrySong1.mp3",
+      title: "So High",
+      path: "./songs/angrySong1.mp3",
+      id: "angrySong1",
+
     },
     {
-      title: "Angry Song 2",
-      path: "angrySong2.mp3",
+      title: "Insane",
+      path: "./songs/angrySong2.mp3",
+      id: "angrySong2",
     },
+    {
+      title: "Bang Bang",
+      path: "./songs/angrySong3.mp3",
+      id: "angrySong3",
+    },
+    {
+      title: "We Rollin",
+      path: "./songs/angrySong4.mp3",
+      id: "angrySong4",
+    }
+
   ],
   disgustedSongs: [
     {
-      title: "Disgusted Song 1",
-      path: "disgustedSong1.mp3",
+
+      title: "Labon ko",
+      path: "./songs/disgustedSong1.mp3",
+      id: "disgustedSong1",
+
     },
     {
-      title: "Disgusted Song 2",
-      path: "disgustedSong2.mp3",
+      title: "Tu jo mila",
+      path: "./songs/disgustedSong2.mp3",
+      id: "disgustedSong2",
+
+    },
+    {
+      title: "Aao milo chalo",
+      path: "./songs/disgustedSong3.mp3",
+      id: "disgustedSong3",
     },
   ],
 
   fearfulSongs: [
     {
-      title: "Fearful Song 1",
-      path: "fearfulSong1.mp3",
-    },
-    {
-      title: "Fearful Song 2",
-      path: "fearfulSong2.mp3",
-    },
+      title: "Hanuman Chalisa",
+      path: "./songs/fearfulSong1.mp3",
+      id: "fearfulSong1",
+    }
   ],
   neutralSongs: [
     {
-      title: "Neutral Song 1",
-      path: "neutralSong1.mp3",
+      title: "Zindagi do pal ki",
+      path: "./songs/neutralSong1.mp3",
+      id: "neutralSong1",
     },
     {
-      title: "Neutral Song 2",
-      path: "neutralSong2.mp3",
+      title: "Beete Lamhein",
+      path: "./songs/neutralSong2.mp3",
+      id: "neutralSong2",
+
     },
+    {
+      title: "Pal",
+      path: "./songs/neutralSong3.mp3",
+      id: "neutralSong3",
+    },
+    {
+      title: "Shayad",
+      path: "./songs/neutralSong4.mp3",
+      id: "neutralSong4",
+    }
   ],
 
   surprisedSongs: [
     {
-      title: "Surprised Song 1",
-      path: "surprisedSong1.mp3",
+      title: "Bad Munda",
+      path: "./songs/surprisedSong1.mp3",
+      id: "surprisedSong1",
     },
     {
-      title: "Surprised Song 2",
-      path: "surprisedSong2.mp3",
+      title: "Blue Eyes",
+      path: "./songs/surprisedSong2.mp3",
+      id: "surprisedSong2",
+
     },
+    {
+      title: "Desire",
+      path: "./songs/surprisedSong3.mp3",
+      id: "surprisedSong3",
+    },
+    {
+      title: "Amplifier",
+      path: "./songs/surprisedSong4.mp3",
+      id: "surprisedSong4",
+    }
   ],
 };

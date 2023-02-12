@@ -6,7 +6,7 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
     <title>Emotion Decetion With face-api.js</title>
     <!-- inlcude cordova.js -->
-    <!-- <script src="cordova.js"></script> -->
+    <script src="cordova.js"></script>
     <link rel="stylesheet" href="index.css" />
   </head>
   <body>
@@ -14,28 +14,42 @@
     <div id="loader" class="loader">
       <div class="loader__inner"></div>
     </div>
+    <div class="container-wrapper">
 
-    <div class="container">
       
-        <h3  class="title">Face Expression Detector</h3>
-     
+      <div class="container">
         
-        <!-- <canvas id="canvas" width="320" height="240"></canvas> -->
-        <!-- <div class="canva-container" id="canvaContainer">
-        </div> -->
-        <canvas style="" id="canvas" width="300" height="300"></canvas>
+        <h3  class="title">Face Expression Detector</h3>
+        <div class="canva-container">
+          <!-- <canvas style="" id="canvas" width="300" height="300"></canvas> -->
+          <div class="video-wrapper">
+            <video  id="video" width="300" height="300" autoplay onload="videoLoaded()" ></video>
+
+          </div>
+
+          <div class="overlay">
+
+          </div>
+        </div>
         <h4 id="expression">
           Expression...
         </h4>
         <div class="suggested-songs">
-          <h3 class="title">Suggested Songs</h3>
+          <div class="song-header">
+            <div class="check-box">
+              <label for="">Lock Songs</label>
+              <input type="checkbox"id="song-lock">
+            </div>
+            <h3 class="title">Suggested Songs (<i id="song-type"></i>) </h3>
+          </div>
           <ul id="song-list" class="song-list">
-           
+            
           </ul>
+         
         </div>
       </div>
-     
-      <video style="display:none" id="video" width="300" height="300" autoplay></video>
+    </div>
+      
     <script src="face-api.min.js"></script>
     <script src="app.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css" integrity="sha512-MV7K8+y+gLIBoVD59lQIYicR65iaqukzvf/nwasF0nqhPay5w/9lJmVM2hMDcnK1OnMGCdVK+iQrJ7lzPJQd1w==" crossorigin="anonymous" referrerpolicy="no-referrer" />
