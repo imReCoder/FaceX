@@ -40,7 +40,7 @@ const startDetecting = async () => {
     audio: false,
     video: {
       width: { ideal: 640 },
-      height: { ideal: 480 },
+      height: { ideal: 640 },
       facingMode: "user",
       frameRate: {
         ideal: 10,
