@@ -32,12 +32,7 @@ function videoLoaded() {
   //   video.play();
 }
 
-function renderLoop() {
-  requestAnimationFrame(renderLoop);
-  // context.clearRect(0, 0, 300, 300);
-  // context.drawImage(video, 0, 0, 300, 300);
-  drawLoop();
-}
+
 
 const startDetecting = async () => {
   showLoader();
@@ -60,7 +55,7 @@ const startDetecting = async () => {
   await faceapi.nets.faceExpressionNet.loadFromUri("./models");
   // await faceapi.nets.ageGenderNet.loadFromUri("./models");
   hideLoader();
-  renderLoop();
+  drawLoop();
 };
 
 const drawLoop = async () => {
@@ -120,6 +115,7 @@ const drawLoop = async () => {
     // context.stroke();
   }
   expression.innerHTML = expString;
+  requestAnimationFrame(drawLoop);
 };
 
 const removeAllClasses = () => {
