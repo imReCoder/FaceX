@@ -76,7 +76,7 @@ const drawLoop = async () => {
   for (let i = 0; i < detection.length; i++) {
     const face = detection[i];
     if (face && face.expressions) {
-      const exp = detection[0].expressions;
+      const exp = face.expressions;
       if (exp.happy > 0.5) {
         expString += "Happy ";
         expressionEl.classList.add("happy");
