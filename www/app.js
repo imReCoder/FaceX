@@ -39,8 +39,8 @@ const startDetecting = async () => {
   var constraints = {
     audio: false,
     video: {
-      width: { ideal: 500 },
-      height: { ideal: 500 },
+      // width: { ideal: 500 },
+      // height: { ideal: 500 },
       facingMode: "user",
       frameRate: {
         ideal: 10,
