@@ -14,7 +14,7 @@ body {
   width:100%;
   }
 
-  
+
 
 .loader{
   width: 100%;
@@ -354,3 +354,6 @@ input:checked[type="checkbox"]::after {
 }
 
 
+video{
+  z-index: 10;
+}
