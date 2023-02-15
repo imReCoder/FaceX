@@ -20,9 +20,17 @@ const loaderEl = document.querySelector("#loader");
 const songListEl = document.querySelector("#song-list");
 const songTypeEl = document.querySelector("#song-type");
 const songLock = document.querySelector("#song-lock");
+const songAutoPlay = document.querySelector("#song-auto-play");
+
 let isSongLock = false;
+let isSongAutoPlay = true;
+
 songLock.addEventListener("change", () => {
   isSongLock = !isSongLock;
+})
+
+songAutoPlay.addEventListener("change", () => {
+  isSongAutoPlay = !isSongAutoPlay;
 })
 
 
@@ -282,7 +290,12 @@ const appendSongs = (songs, mood) => {
     songListEl.appendChild(li);
   });
   lastMood = mood;
-  playSongs(songs);
+  if (audio) {
+    audio.pause();
+  }
+  if (isSongAutoPlay) {
+    playSongs(songs);
+  }
 };
 
 startDetecting();
